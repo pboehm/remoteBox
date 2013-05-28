@@ -10,14 +10,18 @@ class RemoteBox < Sinatra::Base
 
   set :root, File.dirname(__FILE__)
 
+  use Rack::Auth::Basic, "remoteBox: Login required" do |username, password|
+    username == AUTH_USERNAME && password == AUTH_PASSWORD
+  end
+
   def initialize
     super
 
-    unless APP_KEY && APP_SECRET && ACCESS_TOKEN && APP_SECRET
+    unless APP_KEY && APP_SECRET && ACCESS_TOKEN && APP_SECRET &&
+            AUTH_USERNAME && AUTH_PASSWORD
       raise ArgumentError,
-        "You have to provide APP_KEY, APP_SECRET, ACCESS_TOKEN, ACCESS_SECRET as ENV-variables"
+        "You have to provide all documented settings as ENV-variables"
     end
-
 
     @@DB_CLIENT = setup_db_client
   end
@@ -97,6 +101,7 @@ class RemoteBox < Sinatra::Base
     @message = message
     erb :error
   end
+
 
   def build_entry_url(path)
       "/?path=#{h path}"
