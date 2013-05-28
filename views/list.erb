@@ -1,9 +1,25 @@
+<ul class="breadcrumb">
+
+  <li>
+    <a href="/">Startseite</a>
+    <span class="divider">/</span>
+  </li>
+
+  <% for item in @breadcrumbs %>
+    <li>
+      <a href="<%= item.link %>"><%= item.name %></a>
+      <span class="divider">/</span>
+    </li>
+  <% end %>
+
+</ul>
+
 <div id="directory_overview">
     <table class="table table-striped ">
         <% for item in @directories %>
             <tr>
-                <td class="foldername">
-                    <a class="directory" href="<%= item.link %>"><%= item.name %></a>
+                <td>
+                    <a href="<%= item.link %>"><%= item.name %></a>
                 </td>
             </tr>
         <% end %>
@@ -12,8 +28,8 @@
     <table class="table table-striped ">
         <% for item in @files %>
             <tr>
-                <td class="foldername">
-                    <a class="directory" href="<%= item.link %>"><%= item.name %></a>
+                <td>
+                    <a href="<%= item.link %>"><%= item.name %></a>
                 </td>
             </tr>
         <% end %>

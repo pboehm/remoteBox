@@ -1,5 +1,7 @@
 # This File holds some config variables which should be set via ENV variable
 # with the corresponding name
+PAGE_TITLE = ENV.fetch("PAGE_TITLE") { "remoteBox" }
+
 ACCESS_TYPE = :app_folder
 
 APP_KEY    = ENV["APP_KEY"]
