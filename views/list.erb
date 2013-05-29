@@ -22,7 +22,9 @@
                     <a href="<%= item.link %>"><%= item.name %></a>
                 </td>
                 <td style="white-space: nowrap">
-                    <%= item.modified.strftime('%d.%m.%Y %H:%M') %>
+                    <% if not item.is_directory %>
+                        <%= item.modified.strftime('%d.%m.%Y %H:%M') %>
+                    <% end %>
                 </td>
             </tr>
         <% end %>
