@@ -4,7 +4,7 @@ require 'dropbox_sdk'
 
 require_relative 'config'
 
-Entry = Struct.new(:name, :link)
+Entry = Struct.new(:name, :link, :modified, :is_directory)
 
 class RemoteBox < Sinatra::Base
 
@@ -65,9 +65,8 @@ class RemoteBox < Sinatra::Base
 
   def render_folder(db_client, entry)
 
-    @directories = []
-    @files       = []
     @breadcrumbs = []
+    @entries     = []
 
     parts = entry['path'].split(/\//).select { |e| e != "" }
 
@@ -79,18 +78,19 @@ class RemoteBox < Sinatra::Base
     end
 
     entry['contents'].each do |child|
-
       cp = child['path']
       cn = File.basename(cp)
 
-      entry = Entry.new(cn, build_entry_url(cp))
+      entry = Entry.new(cn, build_entry_url(cp),
+                        DateTime.parse(child['modified']),
+                        child['is_dir'])
 
-      if (child['is_dir'])
-        @directories << entry
-      else
-        @files << entry
-      end
+      entry.name += "/" if entry.is_directory
+
+      @entries << entry
     end
+
+    @entries.sort! { |first, second| second.modified <=> first.modified }
 
     erb :list
   end

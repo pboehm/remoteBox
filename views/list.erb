@@ -15,21 +15,14 @@
 </ul>
 
 <div id="directory_overview">
-    <table class="table table-striped ">
-        <% for item in @directories %>
+    <table class="table table-striped">
+        <% for item in @entries %>
             <tr>
-                <td>
+                <td style="overflow: hidden">
                     <a href="<%= item.link %>"><%= item.name %></a>
                 </td>
-            </tr>
-        <% end %>
-    </table>
-
-    <table class="table table-striped ">
-        <% for item in @files %>
-            <tr>
-                <td>
-                    <a href="<%= item.link %>"><%= item.name %></a>
+                <td style="white-space: nowrap">
+                    <%= item.modified.strftime('%d.%m.%Y %H:%M') %>
                 </td>
             </tr>
         <% end %>
