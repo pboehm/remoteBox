@@ -6,6 +6,22 @@ on Heroku.
 
 > based on dropbox-sdk-example web_file_browser.rb
 
+## Configuration
+
+remoteBox is configured through environment variables, because Heroku allows
+you to set them through the `heroku` command. For local development you should
+set them at command line:
+
+```
+$ APP_KEY=.... APP_SECRET=.... ACCESS_TOKEN=.... ACCESS_SECRET=.... \
+AUTH_USERNAME=user AUTH_PASSWORD=password bundle exec shotgun
+
+== Shotgun/Thin on http://0.0.0.0:9393/
+>> Thin web server (v1.5.1 codename Straight Razor)
+>> Maximum connections set to 1024
+>> Listening on 0.0.0.0:9393, CTRL+C to stop
+```
+
 ## License
 
 remoteBox - sinatra app that gives you access to your dropbox
