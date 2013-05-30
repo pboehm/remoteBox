@@ -4,7 +4,13 @@ require 'dropbox_sdk'
 
 require_relative 'config'
 
-Entry = Struct.new(:name, :link, :modified, :is_directory)
+
+class Entry < Struct.new(:name, :link, :modified, :is_directory)
+  def is_dir_numeric
+    is_directory ? 0 : 1
+  end
+end
+
 
 class RemoteBox < Sinatra::Base
 
@@ -91,6 +97,9 @@ class RemoteBox < Sinatra::Base
     end
 
     @entries.sort! { |first, second| second.modified <=> first.modified }
+
+    # directories should be on top of files
+    @entries.sort! { |fir, sec| fir.is_dir_numeric <=> sec.is_dir_numeric }
 
     erb :list
   end
