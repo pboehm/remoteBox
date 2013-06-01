@@ -20,14 +20,12 @@
 <div class="navbar navbar-fixed-top navbar-inverse">
   <div class="navbar-inner">
     <div class="container">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
 
       <a class="brand" href="/"><%= @PAGE_TITLE %></a>
 
+      <form class="navbar-search pull-right" action="/search" method="get">
+          <input type="text" class="search-query" name="query" placeholder="Suche">
+      </form>
     </div>
   </div>
 </div>
@@ -36,6 +34,12 @@
 
   <div class="row">
     <div class="span12">
+        <% if @title %>
+        <div class="page.title">
+            <h2><%= @title %></h2>
+        </div>
+        <% end %>
+
         <%= yield %>
     </div>
   </div>
@@ -43,7 +47,7 @@
   <hr />
   <div class="row">
     <div class="span12" style="text-align: center;">
-      &copy; 2013 Philipp Böhm
+      &copy; <%= Date.today.year %> Philipp Böhm
     </div>
   </div>
 </div>

@@ -15,10 +15,13 @@ end
 class RemoteBox < Sinatra::Base
 
   set :root, File.dirname(__FILE__)
+  set :raise_errors, false
+  set :show_exceptions, false
 
   use Rack::Auth::Basic, "remoteBox: Login required" do |username, password|
     username == AUTH_USERNAME && password == AUTH_PASSWORD
   end
+
 
   def initialize
     super
@@ -32,9 +35,17 @@ class RemoteBox < Sinatra::Base
     @@DB_CLIENT = setup_db_client
   end
 
+
   before do
     @PAGE_TITLE = PAGE_TITLE
   end
+
+
+  error do
+    e = env['sinatra.error']
+    error e.class.name, e.message
+  end
+
 
   def setup_db_client
     session = DropboxSession.new(APP_KEY, APP_SECRET)
@@ -49,59 +60,78 @@ class RemoteBox < Sinatra::Base
 
     # Call DropboxClient.metadata
     path = params[:path] || '/'
-    begin
-      entry = db_client.metadata(path)
-    rescue DropboxAuthError => e
-      return error "Dropbox auth error", "<p>#{h e}</p>"
-    rescue DropboxError => e
-      if e.http_response.code == '404'
-        return error "Path not found: #{h path}", ""
-      else
-        return error "Dropbox API error", "<pre>#{h e.http_response}</pre>"
-      end
-    end
+
+    entry = db_client.metadata(path)
 
     if entry['is_dir']
-      render_folder(db_client, entry)
+      @breadcrumbs = build_up_breadcrumbs(entry['path'])
+      @entries = get_entries_from_result(entry['contents'])
+
+      erb :list
+
     else
-      render_file(db_client, entry)
+      url = db_client.media(entry['path'])["url"]
+      redirect(url)
     end
   end
 
 
-  def render_folder(db_client, entry)
+  get '/search' do
+    db_client = @@DB_CLIENT
 
-    @breadcrumbs = []
-    @entries     = []
+    query = params[:query]
+    return error "No Query specified", "" unless query
 
-    parts = entry['path'].split(/\//).select { |e| e != "" }
+    entries = db_client.search("/", query)
+
+    @title = "Suchergebnisse: '#{ h query }'"
+    @entries = get_entries_from_result(entries).reject {|e| e.is_directory }
+
+    erb :list
+  end
+
+
+  def build_up_breadcrumbs(path)
+
+    breadcrumbs = []
+
+    parts = path.split(/\//).select { |e| e != "" }
 
     while not parts.empty?
       en = Entry.new(parts.last, build_entry_url(parts.join('/')))
-      @breadcrumbs.insert(0, en)
+      breadcrumbs.insert(0, en)
 
       parts.pop
     end
 
-    entry['contents'].each do |child|
+    breadcrumbs
+  end
+
+
+  def get_entries_from_result(result_list)
+
+    entries = []
+
+    result_list.each do |child|
       cp = child['path']
       cn = File.basename(cp)
 
-      entry = Entry.new(cn, build_entry_url(cp),
+      entry = Entry.new(cn,
+                        build_entry_url(cp),
                         DateTime.parse(child['modified']),
                         child['is_dir'])
 
       entry.name += "/" if entry.is_directory
 
-      @entries << entry
+      entries << entry
     end
 
-    @entries.sort! { |first, second| second.modified <=> first.modified }
+    entries.sort! { |first, second| second.modified <=> first.modified }
 
     # directories should be on top of files
-    @entries.sort! { |fir, sec| fir.is_dir_numeric <=> sec.is_dir_numeric }
+    entries.sort! { |fir, sec| fir.is_dir_numeric <=> sec.is_dir_numeric }
 
-    erb :list
+    entries
   end
 
 
@@ -114,12 +144,6 @@ class RemoteBox < Sinatra::Base
 
   def build_entry_url(path)
       "/?path=#{h path}"
-  end
-
-
-  def render_file(db_client, entry)
-    url = db_client.media(entry['path'])["url"]
-    redirect(url)
   end
 
 

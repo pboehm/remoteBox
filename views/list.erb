@@ -1,18 +1,21 @@
+
+<% if @breadcrumbs %>
 <ul class="breadcrumb">
 
-  <li>
-    <a href="/">Startseite</a>
-    <span class="divider">/</span>
-  </li>
-
-  <% for item in @breadcrumbs %>
     <li>
-      <a href="<%= item.link %>"><%= item.name %></a>
-      <span class="divider">/</span>
+        <a href="/">Startseite</a>
+        <span class="divider">/</span>
     </li>
-  <% end %>
+
+    <% for item in @breadcrumbs %>
+        <li>
+        <a href="<%= item.link %>"><%= item.name %></a>
+        <span class="divider">/</span>
+        </li>
+    <% end %>
 
 </ul>
+<% end %>
 
 <div id="directory_overview">
     <table class="table table-striped">
